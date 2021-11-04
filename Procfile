@@ -1,2 +1,2 @@
-web: gunicorn app:app
-web: gunicorn run:stock-scraper361
+web: gunicorn app: app
+web: gunicorn run: stock-scraper361
