@@ -1,57 +1,30 @@
 from flask import Flask, render_template, url_for, request, redirect
 import requests
-from getCrypto import getInfo
 
 app = Flask(__name__)
 
-@app.route('/', methods=['POST', 'GET'])
-def index():
-    response = requests.get("https://top9currencyrate.herokuapp.com/currency")
-    currencyList = response.json()
-    if request.method == 'POST':
+@app.route('/<ticker>', methods=['POST', 'GET'])
+def index(ticker):
 
-        # get form data
-        req = request.form
-        cr1 = req['crypto1']
-        cr2 = req['crypto2']
-        cr3 = req['crypto3']
-        currency = req['currency']
-        rate = 1.00
+    url = "https://yh-finance.p.rapidapi.com/stock/v2/get-profile"
 
-        # get exchange rate
-        for obj in currencyList:
-            if currency == obj['country']:
-                print('matched')
-                
-                rate = obj['rate']
+    querystring = {"symbol":ticker,"region":"US"}
 
-        # get required crypto
-        name1, price = getInfo(cr1)
-        print(type(price), type(rate))
-        price *= float(rate)
-        format_price1 = "{:,.2f}".format(price)
+    headers = {
+        'x-rapidapi-host': "yh-finance.p.rapidapi.com",
+        'x-rapidapi-key': "3881371422mshef5287c1e084505p1b5e4cjsn4e06a31bae67"
+        }
 
-        # get other two crypto if not none
-        if cr2 != "":
-            name2, price = getInfo(cr2)
-            price *= float(rate)
-            format_price2 = "{:,.2f}".format(price)
-        else:
-            name2 = ""
-            format_price2 = ""
+    response = requests.request("GET", url, headers=headers, params=querystring)
 
-        if cr3 != "":
-            name3, price = getInfo(cr3)
-            price *= float(rate)
-            format_price3 = "{:,.2f}".format(price)
-        else:
-            name3 = ""
-            format_price3 = ""
-
-
-        return render_template('index.html', n1 = name1, p1 = format_price1, n2 = name2, p2 = format_price2, n3 = name3, p3 = format_price3, currency = currency)
-    else:
-        return render_template('index.html')
+    res = response.json()
+    print(res['assetProfile']['longBusinessSummary'])
+    print(res['price']['regularMarketPrice']['fmt'])
+    data = {
+        'description': res['assetProfile']['longBusinessSummary'],
+        'price': res['price']['regularMarketPrice']['fmt']
+        }
+    return data
 
 if __name__ == "__main__":
     app.run(debug=True)
