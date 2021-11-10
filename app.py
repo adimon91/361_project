@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
-    response = requests.get("https://top9currencyrate.herokuapp.com/currency")
+    response = requests.get("https://cs361-currency-scraper.herokuapp.com/currency/")
     currencyList = response.json()
     if request.method == 'POST':
 
@@ -21,13 +21,10 @@ def index():
         # get exchange rate
         for obj in currencyList:
             if currency == obj['country']:
-                print('matched')
-                
                 rate = obj['rate']
 
         # get required crypto
         name1, price = getInfo(cr1)
-        print(type(price), type(rate))
         price *= float(rate)
         format_price1 = "{:,.2f}".format(price)
 
