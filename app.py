@@ -10,45 +10,51 @@ def index():
     currencyList = response.json()
     if request.method == 'POST':
 
-        # get form data
         req = request.form
-        cr1 = req['crypto1']
-        cr2 = req['crypto2']
-        cr3 = req['crypto3']
-        currency = req['currency']
+        crypto = getFormData(req)
         rate = 1.00
 
-        # get exchange rate
-        for obj in currencyList:
-            if currency == obj['country']:
-                rate = obj['rate']
+        rate = getExchangeRate(currencyList, crypto)
 
         # get required crypto
-        name1, price = getInfo(cr1)
-        price *= float(rate)
-        format_price1 = "{:,.2f}".format(price)
+        cr1 = getCrypto(crypto, rate, 'cr1')
+        cr2 = getCrypto(crypto, rate, 'cr2')
+        cr3 = getCrypto(crypto, rate, 'cr3')
 
-        # get other two crypto if not none
-        if cr2 != "":
-            name2, price = getInfo(cr2)
-            price *= float(rate)
-            format_price2 = "{:,.2f}".format(price)
-        else:
-            name2 = ""
-            format_price2 = ""
+        data = {
+            'cr1': cr1,
+            'cr2': cr2,
+            'cr3': cr3
+        }
 
-        if cr3 != "":
-            name3, price = getInfo(cr3)
-            price *= float(rate)
-            format_price3 = "{:,.2f}".format(price)
-        else:
-            name3 = ""
-            format_price3 = ""
-
-
-        return render_template('index.html', n1 = name1, p1 = format_price1, n2 = name2, p2 = format_price2, n3 = name3, p3 = format_price3, currency = currency)
+        return render_template('index.html', data=data, currency = crypto['currency'])
     else:
         return render_template('index.html')
+
+def getFormData(req):
+    crObj = {
+        'cr1': req['crypto1'],
+        'cr2': req['crypto2'],
+        'cr3': req['crypto3'],
+        'currency': req['currency']
+    }
+    return crObj
+
+def getExchangeRate(currencyList, crypto):
+    for obj in currencyList:
+        if crypto['currency'] == obj['country']:
+            rate = obj['rate']
+    return rate
+
+def getCrypto(crypto, rate, input):
+    if crypto[input] != "":     
+        name, price = getInfo(crypto[input])
+        price *= float(rate)
+        format_price = "{:,.2f}".format(price)
+    else:
+        name = ''
+        format_price = ''
+    return {'name': name, 'price': format_price}
 
 if __name__ == "__main__":
     app.run(debug=True)
