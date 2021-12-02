@@ -1,6 +1,5 @@
 import requests
 from datetime import date
-# from dateutil.relativedelta import relativedelta
 
 def getInfo(symbol):
     response = requests.get("https://data.messari.io/api/v1/assets/"+symbol+"/metrics")
